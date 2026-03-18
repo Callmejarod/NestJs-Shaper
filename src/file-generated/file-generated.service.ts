@@ -1,13 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import {promises as fs} from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
+import { DataShaper } from './domain/data-shaper';
 
 @Injectable()
 export class FileGeneratedService {
 
-    async getData() {
-        const filePath = path.join(process.cwd(), 'data', 'demo.json');
-        const fileContents = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(fileContents);
-        }
+  async getShapedProducts(view?: string): Promise<any[]> {
+
+    const response = await fetch(
+
+      'http://otherview.org/3D4M/data/products.json'
+
+    );
+
+    if (!response.ok) {
+
+      throw new Error(`Network error: ${response.status}`);
+
+    }
+
+    const rawData = await response.json();
+
+    const shaper = new DataShaper();
+
+    return shaper.shape(rawData, view);
+  }
 }
